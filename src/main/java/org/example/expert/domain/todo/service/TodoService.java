@@ -53,10 +53,6 @@ public class TodoService {
     public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        // 날씨값이 입력되지 않았을 경우
-        if(weather == null) {
-            weather = "InputDataDoesn'tExist";
-        }
         Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable, weather, startDate, endDate);
 
         return todos.map(todo -> new TodoResponse(
