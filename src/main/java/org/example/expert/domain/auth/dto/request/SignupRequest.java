@@ -17,4 +17,7 @@ public class SignupRequest {
     private String password;
     @NotBlank
     private String userRole;
+    // 사용자 닉네임
+    @NotBlank
+    private String nickname;
 }

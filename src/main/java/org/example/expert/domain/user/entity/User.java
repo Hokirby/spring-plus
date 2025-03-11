@@ -20,11 +20,14 @@ public class User extends Timestamped {
     private String password;
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
+    // 사용자 닉네임 column 추가
+    private String nickname;
 
-    public User(String email, String password, UserRole userRole) {
+    public User(String email, String password, UserRole userRole, String nickname) {
         this.email = email;
         this.password = password;
         this.userRole = userRole;
+        this.nickname = nickname;
     }
 
     private User(Long id, String email, UserRole userRole) {
