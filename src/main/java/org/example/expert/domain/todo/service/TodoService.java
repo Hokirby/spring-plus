@@ -8,6 +8,7 @@ import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.entity.Todo;
+import org.example.expert.domain.todo.repository.TodoJpaQueryDslRepository;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class TodoService {
 
+    private final TodoJpaQueryDslRepository queryDslRepository;
     private final TodoRepository todoRepository;
     private final WeatherClient weatherClient;
 
@@ -53,7 +55,7 @@ public class TodoService {
     public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable, weather, startDate, endDate);
+        Page<Todo> todos = queryDslRepository.findAllByOrderByModifiedAtDesc(pageable, weather, startDate, endDate);
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
@@ -68,7 +70,7 @@ public class TodoService {
 
     @Transactional(readOnly = true)
     public TodoResponse getTodo(long todoId) {
-        Todo todo = todoRepository.findByIdWithUser(todoId)
+        Todo todo = queryDslRepository.findByIdWithUser(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
         User user = todo.getUser();
