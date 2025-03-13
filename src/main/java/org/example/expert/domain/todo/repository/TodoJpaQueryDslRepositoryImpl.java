@@ -28,9 +28,9 @@ public class TodoJpaQueryDslRepositoryImpl implements TodoJpaQueryDslRepository 
     private final JPAQueryFactory queryFactory;
 
     public Page<Todo> findAllByWeatherAndBetweenStartDateAndEndDateOrderByModifiedAtDesc(Pageable pageable,
-                                              @Param("weather") String weather,
-                                              @Param("startDate") LocalDateTime startDate,
-                                              @Param("endDate") LocalDateTime endDate) {
+                                                                                         @Param("weather") String weather,
+                                                                                         @Param("startDate") LocalDateTime startDate,
+                                                                                         @Param("endDate") LocalDateTime endDate) {
 
         // 조건 설정
         BooleanBuilder whereClause = new BooleanBuilder();
@@ -61,7 +61,7 @@ public class TodoJpaQueryDslRepositoryImpl implements TodoJpaQueryDslRepository 
                 .where(whereClause)
                 // 값 하나만 가져옴
                 // 기본 값 0
-                .fetchOne(),0L);
+                .fetchOne(), 0L);
 
         return new PageImpl<>(todos, pageable, total);
     }
@@ -75,10 +75,11 @@ public class TodoJpaQueryDslRepositoryImpl implements TodoJpaQueryDslRepository 
                 .fetchOne());
     }
 
-    public Page<SearchTodoResponse> findAllByTitleAndBetweenStartDateAndEndDateOrderByCreatedAtDesc(Pageable pageable,
-                                                                                                    String title,
-                                                                                                    LocalDateTime startDate, LocalDateTime endDate,
-                                                                                                    String nickname) {
+    public Page<SearchTodoResponse> searchTodo(Pageable pageable,
+                                               String title,
+                                               LocalDateTime startDate,
+                                               LocalDateTime endDate,
+                                               String nickname) {
         BooleanBuilder whereClause = new BooleanBuilder();
         // 제목 값 정보가 null 이 아닌 경우
         if (title != null) {
@@ -87,10 +88,10 @@ public class TodoJpaQueryDslRepositoryImpl implements TodoJpaQueryDslRepository 
         // 기간 값 정보가 모두 null 이 아닌 경우
         if (startDate != null && endDate != null) {
             whereClause.and(todo.createdAt.between(startDate, endDate));
-        // 시작 값 정보만 존재할 경우 -> 시작값보다 크거나 같은 값만 가져옴
+            // 시작 값 정보만 존재할 경우 -> 시작값보다 크거나 같은 값만 가져옴
         } else if (startDate != null) {
             whereClause.and(todo.createdAt.goe(startDate));
-        // 종료 값 정보만 존재할 경우 -> 종료값보다 크거나 같은 값만 가져옴
+            // 종료 값 정보만 존재할 경우 -> 종료값보다 작거나 같은 값만 가져옴
         } else if (endDate != null) {
             whereClause.and(todo.createdAt.loe(endDate));
         }
@@ -100,7 +101,10 @@ public class TodoJpaQueryDslRepositoryImpl implements TodoJpaQueryDslRepository 
                     .and(manager.user.nickname.contains(nickname));
         }
 
-        List<SearchTodoResponse> results = queryFactory.select(new QSearchTodoResponse(todo.title, manager.count().intValue(), comment.count().intValue()))
+        List<SearchTodoResponse> results = queryFactory.select(new QSearchTodoResponse(
+                                todo.title,
+                                manager.count().intValue(),
+                                comment.count().intValue()))
                 .from(todo)
                 .join(comment.todo, todo)
                 .join(manager.todo, todo)

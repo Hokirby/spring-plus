@@ -16,8 +16,8 @@ public class SearchService {
 
     private final TodoJpaQueryDslRepository todoQueryDslRepository;
 
-    public Page<SearchTodoResponse> findTodoSearch(int page, int size, String title, LocalDateTime startDate, LocalDateTime endDate, String nickname) {
+    public Page<SearchTodoResponse> searchTodo(int page, int size, String title, LocalDateTime startDate, LocalDateTime endDate, String nickname) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        return todoQueryDslRepository.findAllByTitleAndBetweenStartDateAndEndDateOrderByCreatedAtDesc(pageable, title, startDate, endDate, nickname);
+        return todoQueryDslRepository.searchTodo(pageable, title, startDate, endDate, nickname);
     }
 }

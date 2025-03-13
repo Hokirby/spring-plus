@@ -20,13 +20,13 @@ public class SearchController {
 
     @GetMapping("/search")
     @ResponseBody
-    public ResponseEntity<Page<SearchTodoResponse>> getTodoSearch(@RequestParam(defaultValue = "1") int page,
+    public ResponseEntity<Page<SearchTodoResponse>> searchTodo(@RequestParam(defaultValue = "1") int page,
                                                                   @RequestParam(defaultValue = "10") int size,
                                                                   @RequestParam(required = false) String title,
                                                                   @RequestParam(required = false) LocalDateTime startDate,
                                                                   @RequestParam(required = false) LocalDateTime endDate,
                                                                   @RequestParam(required = false) String nickname) {
-        return ResponseEntity.ok(searchService.findTodoSearch(page, size, title, startDate, endDate, nickname));
+        return ResponseEntity.ok(searchService.searchTodo(page, size, title, startDate, endDate, nickname));
     }
 
 

@@ -13,6 +13,6 @@ public interface TodoJpaQueryDslRepository {
 
     Optional<Todo> findByIdWithUser(Long todoId);
 
-    Page<SearchTodoResponse> findAllByTitleAndBetweenStartDateAndEndDateOrderByCreatedAtDesc(Pageable pageable, String title, LocalDateTime startDate, LocalDateTime endDate, String nickname);
+    Page<SearchTodoResponse> searchTodo(Pageable pageable, String title, LocalDateTime startDate, LocalDateTime endDate, String nickname);
 
 }
