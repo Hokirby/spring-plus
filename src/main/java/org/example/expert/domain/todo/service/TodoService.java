@@ -55,7 +55,7 @@ public class TodoService {
     public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDateTime startDate, LocalDateTime endDate) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = queryDslRepository.findAllByOrderByModifiedAtDesc(pageable, weather, startDate, endDate);
+        Page<Todo> todos = queryDslRepository.findAllByWeatherAndBetweenStartDateAndEndDateOrderByModifiedAtDesc(pageable, weather, startDate, endDate);
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),

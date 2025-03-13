@@ -3,6 +3,8 @@ package org.example.expert.domain.todo.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.example.expert.domain.search.dto.response.QSearchTodoResponse;
+import org.example.expert.domain.search.dto.response.SearchTodoResponse;
 import org.example.expert.domain.todo.entity.Todo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,6 +17,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.example.expert.domain.comment.entity.QComment.comment;
+import static org.example.expert.domain.manager.entity.QManager.manager;
 import static org.example.expert.domain.todo.entity.QTodo.todo;
 
 @RequiredArgsConstructor
@@ -23,7 +27,7 @@ public class TodoJpaQueryDslRepositoryImpl implements TodoJpaQueryDslRepository 
 
     private final JPAQueryFactory queryFactory;
 
-    public Page<Todo> findAllByOrderByModifiedAtDesc(Pageable pageable,
+    public Page<Todo> findAllByWeatherAndBetweenStartDateAndEndDateOrderByModifiedAtDesc(Pageable pageable,
                                               @Param("weather") String weather,
                                               @Param("startDate") LocalDateTime startDate,
                                               @Param("endDate") LocalDateTime endDate) {
@@ -69,5 +73,50 @@ public class TodoJpaQueryDslRepositoryImpl implements TodoJpaQueryDslRepository 
                 .where(todo.id.eq(todoId))
                 // 값 하나만 가져옴
                 .fetchOne());
+    }
+
+    public Page<SearchTodoResponse> findAllByTitleAndBetweenStartDateAndEndDateOrderByCreatedAtDesc(Pageable pageable,
+                                                                                                    String title,
+                                                                                                    LocalDateTime startDate, LocalDateTime endDate,
+                                                                                                    String nickname) {
+        BooleanBuilder whereClause = new BooleanBuilder();
+        // 제목 값 정보가 null 이 아닌 경우
+        if (title != null) {
+            whereClause.and(todo.title.contains(title));
+        }
+        // 기간 값 정보가 모두 null 이 아닌 경우
+        if (startDate != null && endDate != null) {
+            whereClause.and(todo.createdAt.between(startDate, endDate));
+        // 시작 값 정보만 존재할 경우 -> 시작값보다 크거나 같은 값만 가져옴
+        } else if (startDate != null) {
+            whereClause.and(todo.createdAt.goe(startDate));
+        // 종료 값 정보만 존재할 경우 -> 종료값보다 크거나 같은 값만 가져옴
+        } else if (endDate != null) {
+            whereClause.and(todo.createdAt.loe(endDate));
+        }
+        // 닉네임 정보가 null 이 아닌 경유
+        if (nickname != null) {
+            whereClause.and(manager.todo.eq(todo))
+                    .and(manager.user.nickname.contains(nickname));
+        }
+
+        List<SearchTodoResponse> results = queryFactory.select(new QSearchTodoResponse(todo.title, manager.count().intValue(), comment.count().intValue()))
+                .from(todo)
+                .join(comment.todo, todo)
+                .join(manager.todo, todo)
+                .where(whereClause)
+                .groupBy(todo.title)
+                .orderBy(todo.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = Objects.requireNonNullElse(queryFactory
+                .select(todo.count())
+                .from(todo)
+                .where(whereClause)
+                .fetchOne(), 0L);
+
+        return new PageImpl<>(results, pageable, total);
     }
 }
