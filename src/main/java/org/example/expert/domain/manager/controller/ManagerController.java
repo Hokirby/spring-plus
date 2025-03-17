@@ -21,7 +21,7 @@ public class ManagerController {
 
     private final ManagerService managerService;
 
-    @Secured(UserRole.Authority.ADMIN)
+    @Secured({UserRole.Authority.ADMIN, UserRole.Authority.USER})
     @PostMapping("/todos/{todoId}/managers")
     public ResponseEntity<ManagerSaveResponse> saveManager(
             @Auth AuthUser authUser,
