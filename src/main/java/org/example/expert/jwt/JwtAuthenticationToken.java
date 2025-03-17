@@ -1,4 +1,4 @@
-package org.example.expert.config;
+package org.example.expert.jwt;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
